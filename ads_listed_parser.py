@@ -47,6 +47,8 @@ def get_text(bs4tag):
 
 
 ######################################################################################################################
+
+
 def get_listed_ads(ad, added_time_test):
     data = {
         "status": None,
@@ -193,11 +195,28 @@ def get_promo_ads(ad, added_time_test):
     data["rooms"] = extract_int(rooms) or None
 
     broker = ad.find("a", "search-result-makelaar")
-    broker_link = broker["href"]
-    broker_link = root_link + broker_link
-    data["broker_link"] = broker_link or None
 
-    broker_name = get_text(broker.find("span", "search-result-makelaar-name"))
+    if broker is None:
+        # structure change
+        # data stored in div now
+
+        # a tag with same name inside div
+        broker = ad.find("div", "search-result-makelaar").find("a", "search-result-makelaar-name")
+
+        broker_link = broker["href"]
+        broker_link = root_link + broker_link
+
+        # name is not included in span, its in a tag
+        broker_name = get_text(broker)
+
+    else:
+        broker_link = broker["href"]
+        broker_link = root_link + broker_link
+
+        broker_name = get_text(broker.find("span", "search-result-makelaar-name"))
+
+    # updating broker link, broker name
+    data["broker_link"] = broker_link or None
     data["broker_name"] = remove_newline(broker_name) or None
 
     if added_time_test is not None:
@@ -212,8 +231,11 @@ def get_promo_ads(ad, added_time_test):
 
 
 def ads_listed_parser(html_doc, added_time_test=None, return_list_of_list_data=None, url=None):
-
     soup = BeautifulSoup(html_doc, "lxml")
+    pagecheck = soup.find(string="0 resultaten")
+    if pagecheck:
+        return ["Invalid page"]
+
     # print(soup.title.text)
     if soup.title.text.strip() == "Je bent bijna op de pagina die je zoekt [funda]":
         print("bot detected")
@@ -230,7 +252,7 @@ def ads_listed_parser(html_doc, added_time_test=None, return_list_of_list_data=N
         sys.exit()
 
     for ad in list_of_ads:
-        data = get_listed_ads(ad, added_time_test)
+        data: dict = get_listed_ads(ad, added_time_test)
         if return_list_of_list_data:
             data = list(data.values())
         cleaned_ads_in_this_page.append(data)
@@ -241,7 +263,7 @@ def ads_listed_parser(html_doc, added_time_test=None, return_list_of_list_data=N
     list_of_promoads = soup.find_all("div", "search-result-main-promo")
 
     for ad in list_of_promoads:
-        data = get_promo_ads(ad, added_time_test)
+        data: dict = get_promo_ads(ad, added_time_test)
         if return_list_of_list_data:
             data = list(data.values())
         cleaned_ads_in_this_page.append(data)

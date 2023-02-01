@@ -1,5 +1,6 @@
 requests==2.28.1
 beautifulsoup4==4.11.1
-lxml==4.9.1
-uvloop==0.16.0
-aiohttp[speedups]==3.8.1
+lxml==4.9.2
+uvloop==0.17.0
+aiohttp[speedups]==3.8.3
+psutil==5.9.4

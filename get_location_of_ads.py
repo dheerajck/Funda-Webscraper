@@ -27,7 +27,6 @@ async def http_client(session, url):
 
 
 async def get_location_from_link(connection):
-
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8',
         'Accept-Encoding': 'gzip, deflate',
@@ -46,7 +45,6 @@ async def get_location_from_link(connection):
     QUERY = "SELECT link FROM ads WHERE latitude is NULL AND longitude is NULL AND error_link is NULL"
 
     async with aiohttp.ClientSession(headers=headers, timeout=my_timeout) as session:
-
         cursor.execute(QUERY)
         ads = cursor.fetchall()
 
@@ -56,7 +54,6 @@ async def get_location_from_link(connection):
 
         test = 100
         while ads:
-
             location_collection_tasks = (http_client(session, url_tuple[0]) for url_tuple in ads[:test])
             location_data = await asyncio.gather(*location_collection_tasks)
             # await asyncio.sleep(1)
@@ -71,7 +68,6 @@ async def get_location_from_link(connection):
 
 
 if __name__ == "__main__":
-
     t1 = time.perf_counter()
     connection = sqlite3.connect('fundanew.db')
     while True:

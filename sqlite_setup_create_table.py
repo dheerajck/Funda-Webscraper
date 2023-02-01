@@ -2,9 +2,9 @@ import sqlite3
 
 
 def create_new_table():
-    new_connection = sqlite3.connect('fundanew.db')
+    connection = sqlite3.connect('fundanew.db')
 
-    cursor = new_connection.cursor()
+    cursor = connection.cursor()
     cursor.execute(
         """
         CREATE TABLE IF NOT EXISTS ads (
@@ -22,7 +22,10 @@ def create_new_table():
         broker_link text,
         is_processed boolean DEFAULT FALSE,
         added_on timestamp,
-
+        type text,
+        latitude text,
+        longitude text,
+        error_link text,
         UNIQUE(link)
 
         )"""
@@ -40,8 +43,9 @@ def create_new_table():
         is_processed boolean DEFAULT FALSE,
         added_on timestamp DEFAULT CURRENT_TIMESTAMP,
 
-        FOREIGN KEY (ad_id) REFERENCES ads(id)
+        FOREIGN KEY (ad_id) REFERENCES ads(id),
 
+        UNIQUE (ad_id, image_link)
         )"""
     )
 
@@ -56,10 +60,13 @@ def create_new_table():
         is_processed boolean DEFAULT FALSE,
         added_on timestamp DEFAULT CURRENT_TIMESTAMP,
 
-        FOREIGN KEY (ad_id) REFERENCES ads(id)
+        FOREIGN KEY (ad_id) REFERENCES ads(id),
 
+        UNIQUE (ad_id)
         )"""
     )
+
+    connection.close()
 
 
 # PRAGMA foreign_keys;

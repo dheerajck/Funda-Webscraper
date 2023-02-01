@@ -4,13 +4,23 @@ from bs4 import BeautifulSoup
 from get_best_image import get_best_image_source_str
 from insert_data import insert_ad_specific_details
 
+import zlib
+
 
 def ad_specific_parser_and_insert_db(html_doc, ad_id, url=None, connection=None):
-
     soup = BeautifulSoup(html_doc, "lxml")
     soup = soup.body
 
     html_string = html_doc
+    # compressing step
+    html_string = html_doc.encode()
+    html_compress = zlib.compress(html_string)
+    html_string = html_compress
+
+    # decompressing step
+    # html_string = zlib.decompress(html_string).decode()
+    # print(html_string==html_doc)
+
     images_list = image_links_new(soup, ad_id)
     coordinates = get_coordinates(soup, url)
 
@@ -19,7 +29,6 @@ def ad_specific_parser_and_insert_db(html_doc, ad_id, url=None, connection=None)
 
 
 def image_links_new(soup, ad_id):
-
     # root_link = "https://www.funda.nl"
     media = []
 
@@ -42,7 +51,6 @@ def image_links_new(soup, ad_id):
 
 
 def get_coordinates(soup, url=None, covert_to_soup=False):
-
     if covert_to_soup:
         soup = BeautifulSoup(soup, "lxml")
         soup = soup.body
@@ -53,7 +61,6 @@ def get_coordinates(soup, url=None, covert_to_soup=False):
         error = f"link expired or wrong link - {error}"
         return [None, None, error]
     else:
-
         coordinates = json.loads(coordinates_json_string.string)
         try:
             lat: str = coordinates["lat"] or None

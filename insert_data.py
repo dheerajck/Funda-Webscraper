@@ -1,13 +1,22 @@
+import sqlite3
+
+
 def insert_html_string(cursor, ad_id, html_string):
     QUERY_RAW_HTML_TEXT = "INSERT INTO ad_details(ad_id, ad_body) VALUES(?, ?)"
 
-    cursor.execute(QUERY_RAW_HTML_TEXT, (ad_id, html_string))
+    try:
+        cursor.execute(QUERY_RAW_HTML_TEXT, (ad_id, html_string))
+    except sqlite3.IntegrityError:
+        pass
 
 
 def insert_images(cursor, images_list):
+    QUERY_IMAGES = "INSERT INTO images(ad_id, type_of_image, image_link) VALUES(?, ?, ?)"
 
-    QUERY_IMAGES = "INSERT INTO IMAGES(ad_id, type_of_image, image_link) VALUES(?, ?, ?)"
-    cursor.executemany(QUERY_IMAGES, images_list)
+    try:
+        cursor.executemany(QUERY_IMAGES, images_list)
+    except sqlite3.IntegrityError:
+        pass
 
 
 def update_ads_coordinates(cursor, ad_id, coordinates):
@@ -29,12 +38,9 @@ def insert_ads_old(connection, ads_list):
 
     result = []
     for ad in ads_list:
-
         cursor.execute(QUERY, list(ad.values()))
         result += [cursor.fetchone()]
 
-    # print(result)
-    connection.commit()
     return result
 
 
@@ -49,16 +55,11 @@ def insert_ads(connection, ads_list):
                 """
 
     cursor.executemany(QUERY, ads_list)
-    # print(result)
-    connection.commit()
 
 
 def insert_ad_specific_details(connection, ad_id, html_string, images_list, coordinates):
-
     cursor = connection.cursor()
 
-    # insert_html_string(cursor, ad_id, html_string)
+    insert_html_string(cursor, ad_id, html_string)
     update_ads_coordinates(cursor, ad_id, coordinates)
     insert_images(cursor, images_list)
-
-    connection.commit()
